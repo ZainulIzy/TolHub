@@ -1,9 +1,9 @@
--- [[ TOLHUB SCRIPT - RAYFIELD EDITION ]]
+-- [[ TOLHUB SCRIPT - PREMIUM VERSION ]]
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "TolHub 🌿",
-   LoadingTitle = "TolHub Script",
+   LoadingTitle = "TolHub Professional",
    LoadingSubtitle = "by Xizzy",
    ConfigurationSaving = {
       Enabled = true,
@@ -12,59 +12,84 @@ local Window = Rayfield:CreateWindow({
    KeySystem = false 
 })
 
--- Variabel Penampung Angka
-_G.SpeedInput = 16
-_G.JumpInput = 50
+-- Variabel Default
+_G.SpeedValue = 16
+_G.SpeedActive = false
+_G.JumpValue = 50
+_G.JumpActive = false
+local DiscordLink = "https://discord.gg/redzhub" -- Ganti pake link discord lo
 
--- [[ TAB MAIN ]]
-local MainTab = Window:CreateTab("Main 🏠", 4483362458)
+-- [[ TAB UTAMA ]]
+local MainTab = Window:CreateTab("Home 🏠", 4483362458)
 
-MainTab:CreateSection("Karakter Settings")
+-- 1. TOMBOL DISCORD (DI PALING ATAS)
+MainTab:CreateSection("Community")
 
--- Input Box untuk Speed
-MainTab:CreateInput({
-   Name = "Set WalkSpeed",
-   PlaceholderText = "Ketik angka (Contoh: 100)",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      _G.SpeedInput = tonumber(Text)
+MainTab:CreateButton({
+   Name = "📋 Salin Link Discord TolHub",
+   Callback = function()
+      setclipboard(DiscordLink) -- Fungsi otomatis copy ke HP
+      Rayfield:Notify({
+         Title = "Berhasil Salin!",
+         Content = "Link Discord sudah disalin ke papan klip.",
+         Duration = 3,
+         Image = 4483362458,
+      })
    end,
 })
 
--- Tombol Aktifkan Speed
-MainTab:CreateButton({
-   Name = "Aktifkan Speed",
-   Callback = function()
-      local char = game.Players.LocalPlayer.Character
-      if char and char:FindFirstChild("Humanoid") and _G.SpeedInput then
-         char.Humanoid.WalkSpeed = _G.SpeedInput
-         Rayfield:Notify({
-            Title = "Sukses!",
-            Content = "Speed diatur ke: " .. _G.SpeedInput,
-            Duration = 2,
-            Image = 4483362458,
-         })
+-- 2. DROPDOWN / SECTION KARAKTER
+local CharSection = MainTab:CreateSection("Karakter")
+
+-- Bagian Speed di dalam Karakter
+MainTab:CreateInput({
+   Name = "Input Angka Speed",
+   PlaceholderText = "Ketik Speed...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      _G.SpeedValue = tonumber(Text) or 16
+      if _G.SpeedActive then
+         game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = _G.SpeedValue
       end
    end,
 })
 
--- Input Box untuk Jump
-MainTab:CreateInput({
-   Name = "Set JumpPower",
-   PlaceholderText = "Ketik angka (Contoh: 100)",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      _G.JumpInput = tonumber(Text)
+MainTab:CreateToggle({
+   Name = "Lari (On/Off)",
+   CurrentValue = false,
+   Flag = "SpeedTog",
+   Callback = function(Value)
+      _G.SpeedActive = Value
+      local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+      if hum then
+         hum.WalkSpeed = _G.SpeedActive and _G.SpeedValue or 16
+      end
    end,
 })
 
--- Tombol Aktifkan Jump
-MainTab:CreateButton({
-   Name = "Aktifkan Jump",
-   Callback = function()
-      local char = game.Players.LocalPlayer.Character
-      if char and char:FindFirstChild("Humanoid") and _G.JumpInput then
-         char.Humanoid.JumpPower = _G.JumpInput
+-- Bagian Jump di dalam Karakter
+MainTab:CreateInput({
+   Name = "Input Angka Lompat",
+   PlaceholderText = "Ketik Jump...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      _G.JumpValue = tonumber(Text) or 50
+      if _G.JumpActive then
+         game.Players.LocalPlayer.Character.Humanoid.JumpPower = _G.JumpValue
+      end
+   end,
+})
+
+MainTab:CreateToggle({
+   Name = "Lompat (On/Off)",
+   CurrentValue = false,
+   Flag = "JumpTog",
+   Callback = function(Value)
+      _G.JumpActive = Value
+      local hum = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+      if hum then
+         hum.UseJumpPower = true
+         hum.JumpPower = _G.JumpActive and _G.JumpValue or 50
       end
    end,
 })
@@ -72,15 +97,16 @@ MainTab:CreateButton({
 -- [[ TAB FARM ]]
 local FarmTab = Window:CreateTab("Farm 🚜", 4483362458)
 
-local clicking = false
+FarmTab:CreateSection("Automation")
+
 FarmTab:CreateToggle({
    Name = "Auto Clicker",
    CurrentValue = false,
    Flag = "AutoClick",
    Callback = function(Value)
-      clicking = Value
+      _G.Clicking = Value
       task.spawn(function()
-         while clicking do
+         while _G.Clicking do
             local vim = game:GetService("VirtualInputManager")
             vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
             vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
@@ -90,27 +116,19 @@ FarmTab:CreateToggle({
    end,
 })
 
-FarmTab:CreateToggle({
-   Name = "Anti-AFK",
-   CurrentValue = false,
-   Flag = "AntiAFK",
-   Callback = function(Value)
-      _G.AntiAFK = Value
-      local vu = game:GetService("VirtualUser")
-      game:GetService("Players").LocalPlayer.Idled:connect(function()
-         if _G.AntiAFK then
-            vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-            task.wait(1)
-            vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-         end
-      end)
-   end,
-})
+-- Sistem Auto-Respawn (Biar kalau mati tetep aktif)
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    local hum = char:WaitForChild("Humanoid")
+    task.wait(0.5)
+    if _G.SpeedActive then hum.WalkSpeed = _G.SpeedValue end
+    if _G.JumpActive then 
+        hum.UseJumpPower = true
+        hum.JumpPower = _G.JumpValue 
+    end
+end)
 
--- Notifikasi Akhir
 Rayfield:Notify({
-   Title = "NathHub Ready!",
-   Content = "Menu Rayfield siap digeser, Bos!",
-   Duration = 5,
-   Image = 4483362458,
+   Title = "TolHub Loaded",
+   Content = "Selamat datang, Bos Xizzy!",
+   Duration = 5
 })
