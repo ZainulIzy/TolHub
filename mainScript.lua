@@ -1,85 +1,100 @@
--- [[ TOLHUB - REDZ V5 OFFICIAL ]]
-local status, RedzLib = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/REDZHUB/RedzLibV5/main/Source.Lua"))()
+-- Load Redz Hub UI Library
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
+
+-- Create the main window
+local Window = redzlib:MakeWindow({
+    Title = "Example Hub",
+    SubTitle = "by YourNameHere",
+    SaveFolder = "ExampleHubConfig"
+})
+
+-- Add a minimize button with original Redz asset
+Window:AddMinimizeButton({
+    Button = {
+        Image = "rbxassetid://71014873973869",
+        BackgroundTransparency = 0
+    },
+    Corner = {
+        CornerRadius = UDim.new(0, 8)
+    }
+})
+
+-- First tab: Discord invite
+local DiscordInviteTab = Window:MakeTab({"Discord Example Invite", "mail"})
+
+DiscordInviteTab:AddDiscordInvite({
+    Name = "Example Discord Invite",
+    Description = "This is an Example discord invite",
+    Logo = "rbxassetid://18751483361",
+    Invite = "https://discord.gg/example"
+})
+
+-- Second tab: First Tab with dice icon
+local FirstTab = Window:MakeTab({"First Tab", "dice-1"})
+
+-- Select "First Tab" by default
+Window:SelectTab(FirstTab)
+
+FirstTab:AddButton({"Example Button (prints <font color='rgb(88, 101, 242)'>Hello World</font>)", function(Value)
+print("Hello World!")
+end})
+
+local LolToggle = FirstTab:AddToggle({
+  Name = "Toggle",
+  Description = "Prints the state of the toggle (<font color='rgb(0, 255, 0)'>On</font> or <font color='rgb(255, 0, 0)'>Off</font>)",
+  Default = false 
+})
+LolToggle:Callback(function(Value)
+    if Value then
+        print("The toggle is On")
+    else
+        print("The toggle is Off")
+    end
 end)
 
-if not status then
-    warn("Library Error: " .. tostring(RedzLib))
-    return
-end
-
-local Window = RedzLib:MakeWindow({
-  Title = "TolHub 🌿",
-  SubTitle = "by Xizzy",
-  SaveFolder = "TolHub_Data.lua"
-})
-
--- Tombol Buka/Tutup (Minimize)
-Window:AddMinimizeButton({
-    Button = { Image = "rbxassetid://71014873973869", BackgroundTransparency = 0 },
-    Corner = { CornerRadius = UDim.new(35, 1) },
-})
-
--- Simpanan Angka
-_G.SpeedAngka = 16
-_G.JumpAngka = 50
-
--- [[ TAB UTAMA ]]
-local Tab1 = Window:MakeTab({"Main 🏠", "home"})
-
-Tab1:AddSection({"Speed Settings"})
-
-Tab1:AddTextBox({
-  Name = "Input Speed",
-  Description = "Ketik angka lalu klik Aktifkan", 
-  PlaceholderText = "Contoh: 100",
-  Callback = function(Value)
-     _G.SpeedAngka = tonumber(Value)
-  end
-})
-
-Tab1:AddButton({"Aktifkan Speed", function()
-    local char = game.Players.LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") and _G.SpeedAngka then
-        char.Humanoid.WalkSpeed = _G.SpeedAngka
-    end
-end})
-
-Tab1:AddSection({"Jump Settings"})
-
-Tab1:AddTextBox({
-  Name = "Input Jump",
-  Description = "Ketik angka lalu klik Aktifkan", 
-  PlaceholderText = "Contoh: 100",
-  Callback = function(Value)
-     _G.JumpAngka = tonumber(Value)
-  end
-})
-
-Tab1:AddButton({"Aktifkan Jump", function()
-    local char = game.Players.LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") and _G.JumpAngka then
-        char.Humanoid.JumpPower = _G.JumpAngka
-    end
-end})
-
--- [[ TAB FARM ]]
-local Tab2 = Window:MakeTab({"Farm 🚜", "tractor"})
-
-Tab2:AddToggle({
-    Name = "Auto Clicker",
-    Default = false,
+-- Add speed slider (prints value up to 300, increases by 5)
+-- Add slider with updated name and formatting
+FirstTab:AddSlider({
+    Name = "Slider Example (prints the sliders <font color='rgb(255, 255, 0)'>value</font>)",
+    Min = 1,
+    Max = 300,
+    Increase = 5,
+    Default = 16,
     Callback = function(Value)
-        _G.AutoClick = Value
-        task.spawn(function()
-            while _G.AutoClick do
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-                task.wait(0.1)
-            end
-        end)
+        print("Slider value is:", Value)
     end
 })
 
-Window:SelectTab(Tab1)
+-- Third tab: Second Tab with dice-2 icon
+local SecondTab = Window:MakeTab({"Second Tab", "dice-2"})
+
+-- Add section before paragraph
+local Section = SecondTab:AddSection({"Example Section"})
+
+-- Add paragraph
+local Paragraph = SecondTab:AddParagraph({
+    "Example Paragraph", 
+    "This is an Example Paragraph\nThis is the second line of the paragraph."
+})
+
+-- Add dropdown
+local Dropdown = SecondTab:AddDropdown({
+    Name = "Example Drop-down",
+    Description = "Prints the drop-down",
+    Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"},
+    Default = "2",
+    Flag = "dropdown teste",
+    Callback = function(D)
+        print("Selected value:", D)
+    end
+})
+
+-- Add textbox
+local TextBox = SecondTab:AddTextBox({
+    Name = "Textbox Example",
+    Description = "Prints whatever you type in textbox", 
+    PlaceholderText = "Type Anything You Can Imagine",
+    Callback = function(Text)
+        print(Text)
+    end
+})
